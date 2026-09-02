@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: cobalt-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    envVars:
+      - key: API_AUTH_REQUIRED
+        value: "false"
+      - key: CORS_WILDCARD
+        value: "1"
+      - key: ENABLE_YTDLP
+        value: "1"
+      - key: RATELIMIT_MAX
+        value: "100"
+      - key: RATELIMIT_WINDOW
+        value: "60"

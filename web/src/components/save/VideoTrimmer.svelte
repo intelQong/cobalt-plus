@@ -1,10 +1,9 @@
 <script lang="ts">
     import { trimStart, trimEnd, trimEnabled } from "$lib/state/omnibox";
-    import { hapticSelection } from "$lib/haptics";
+    import { hapticSwitch } from "$lib/haptics";
     import IconScissors from "@tabler/icons-svelte/IconScissors.svelte";
     import IconClock from "@tabler/icons-svelte/IconClock.svelte";
-    import IconRotateCcw from "@tabler/icons-svelte/IconRotateCcw.svelte";
-    import IconSparkles from "@tabler/icons-svelte/IconSparkles.svelte";
+    import IconRestore from "@tabler/icons-svelte/IconRestore.svelte";
 
     // Duration helper: parses hh:mm:ss or mm:ss to seconds
     const parseTimeToSeconds = (t: string): number => {
@@ -38,7 +37,7 @@
 
     // Preset helper
     const applyPreset = (durationSec: number | null) => {
-        hapticSelection();
+        hapticSwitch();
         if (durationSec === null) {
             $trimStart = "00:00:00";
             $trimEnd = "";
@@ -49,7 +48,7 @@
     };
 
     const resetTrim = () => {
-        hapticSelection();
+        hapticSwitch();
         $trimStart = "00:00:00";
         $trimEnd = "";
     };
@@ -65,7 +64,7 @@
             {/if}
         </div>
         <button class="reset-btn" onclick={resetTrim} title="Reset trim timestamps" aria-label="Reset trim">
-            <IconRotateCcw size={14} />
+            <IconRestore size={14} />
             <span>Reset</span>
         </button>
     </div>

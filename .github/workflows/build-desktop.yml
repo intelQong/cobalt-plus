@@ -34,6 +34,8 @@ jobs:
         run: pnpm install --frozen-lockfile=false
 
       - name: Build Web Frontend
+        env:
+          WEB_DEFAULT_API: http://localhost:9000
         run: pnpm --filter @imput/cobalt-web build
 
       - name: Install Desktop Packaging Dependencies
@@ -72,6 +74,8 @@ jobs:
         run: pnpm install --frozen-lockfile=false
 
       - name: Build Web Frontend
+        env:
+          WEB_DEFAULT_API: http://localhost:9000
         run: pnpm --filter @imput/cobalt-web build
 
       - name: Install Desktop Packaging Dependencies

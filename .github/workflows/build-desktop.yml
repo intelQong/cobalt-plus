@@ -20,9 +20,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9.6.0
+        uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -31,20 +29,15 @@ jobs:
           cache: 'pnpm'
 
       - name: Install Project Dependencies
-        run: pnpm install --frozen-lockfile=false
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build Web Frontend
         env:
           WEB_DEFAULT_API: http://localhost:9000
         run: pnpm --filter @imput/cobalt-web build
 
-      - name: Install Desktop Packaging Dependencies
-        working-directory: ./desktop
-        run: npm install
-
       - name: Build Linux AppImage
-        working-directory: ./desktop
-        run: npm run build:linux
+        run: pnpm --filter cobalt-plus-plus-desktop run build:linux
 
       - name: Upload Linux AppImage Artifact
         uses: actions/upload-artifact@v4
@@ -60,9 +53,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9.6.0
+        uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -71,20 +62,15 @@ jobs:
           cache: 'pnpm'
 
       - name: Install Project Dependencies
-        run: pnpm install --frozen-lockfile=false
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build Web Frontend
         env:
           WEB_DEFAULT_API: http://localhost:9000
         run: pnpm --filter @imput/cobalt-web build
 
-      - name: Install Desktop Packaging Dependencies
-        working-directory: ./desktop
-        run: npm install
-
       - name: Build Windows Portable Executable
-        working-directory: ./desktop
-        run: npm run build:win
+        run: pnpm --filter cobalt-plus-plus-desktop run build:win
 
       - name: Upload Windows Portable Artifact
         uses: actions/upload-artifact@v4
@@ -97,6 +83,8 @@ jobs:
     needs: [build-linux, build-windows]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Download Linux Artifacts
         uses: actions/download-artifact@v4
@@ -114,7 +102,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: dist-release/*
+          tag_name: ${{ github.ref_name }}
+          name: Cobalt++ ${{ github.ref_name }}
           draft: false
           prerelease: false
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

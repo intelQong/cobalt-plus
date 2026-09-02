@@ -7,7 +7,7 @@ import { get } from "svelte/store";
 import { t } from "$lib/i18n/translations";
 import { downloadFile } from "$lib/download";
 import { createDialog } from "$lib/state/dialogs";
-import { downloadButtonState } from "$lib/state/omnibox";
+import { downloadButtonState, trimEnabled, trimStart, trimEnd } from "$lib/state/omnibox";
 import { createSavePipeline } from "$lib/task-manager/queue";
 
 import type { CobaltSaveRequestBody } from "$lib/types/api";
@@ -41,6 +41,10 @@ export const savingHandler = async ({ url, request, oldTaskId }: SavingHandlerAr
 
     if (!request && !url) return;
 
+    const isTrimActive = get(trimEnabled);
+    const configuredTrimStart = isTrimActive && get(trimStart) ? get(trimStart).trim() : undefined;
+    const configuredTrimEnd = isTrimActive && get(trimEnd) ? get(trimEnd).trim() : undefined;
+
     const selectedRequest = request || {
         url: url!,
 
@@ -67,6 +71,9 @@ export const savingHandler = async ({ url, request, oldTaskId }: SavingHandlerAr
 
         allowH265: getSetting("save", "allowH265"),
         convertGif: getSetting("save", "convertGif"),
+
+        trimStart: configuredTrimStart || undefined,
+        trimEnd: configuredTrimEnd || undefined,
     }
 
     const response = await API.request(selectedRequest);

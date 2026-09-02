@@ -19,9 +19,21 @@ export const getMediaType = (type: string) => {
     }
 }
 
-export const createRemuxPipeline = (file: File) => {
+export const createRemuxPipeline = (file: File, trim?: { start?: string, end?: string }) => {
     const parentId = uuid();
     const mediaType = getMediaType(file.type);
+
+    const ffargs = [
+        "-c", "copy",
+        "-map", "0"
+    ];
+
+    if (trim?.start) {
+        ffargs.unshift("-ss", trim.start);
+    }
+    if (trim?.end) {
+        ffargs.push("-to", trim.end);
+    }
 
     const pipeline: CobaltPipelineItem[] = [{
         worker: "remux",
@@ -29,10 +41,7 @@ export const createRemuxPipeline = (file: File) => {
         parentId,
         workerArgs: {
             files: [file],
-            ffargs: [
-                "-c", "copy",
-                "-map", "0"
-            ],
+            ffargs,
             output: {
                 type: file.type,
                 format: file.name.split(".").pop(),
@@ -54,8 +63,18 @@ export const createRemuxPipeline = (file: File) => {
     }
 }
 
-const makeRemuxArgs = (info: CobaltLocalProcessingResponse) => {
+const makeRemuxArgs = (info: CobaltLocalProcessingResponse, request?: CobaltSaveRequestBody) => {
     const ffargs = ["-c:v", "copy"];
+
+    const trimStart = request?.trimStart || info.trim?.start;
+    const trimEnd = request?.trimEnd || info.trim?.end;
+
+    if (trimStart) {
+        ffargs.unshift("-ss", trimStart);
+    }
+    if (trimEnd) {
+        ffargs.push("-to", trimEnd);
+    }
 
     if (["merge", "remux"].includes(info.type)) {
         ffargs.push("-c:a", "copy");
@@ -77,12 +96,22 @@ const makeRemuxArgs = (info: CobaltLocalProcessingResponse) => {
     return ffargs;
 }
 
-const makeAudioArgs = (info: CobaltLocalProcessingResponse) => {
+const makeAudioArgs = (info: CobaltLocalProcessingResponse, request?: CobaltSaveRequestBody) => {
     if (!info.audio) {
         return;
     }
 
     const ffargs = [];
+
+    const trimStart = request?.trimStart || info.trim?.start;
+    const trimEnd = request?.trimEnd || info.trim?.end;
+
+    if (trimStart) {
+        ffargs.unshift("-ss", trimStart);
+    }
+    if (trimEnd) {
+        ffargs.push("-to", trimEnd);
+    }
 
     if (info.audio.cover && info.audio.format === "mp3") {
         ffargs.push(
@@ -178,9 +207,9 @@ export const createSavePipeline = (
 
         if (["merge", "mute", "remux"].includes(info.type)) {
             workerType = "remux";
-            ffargs = makeRemuxArgs(info);
+            ffargs = makeRemuxArgs(info, request);
         } else if (info.type === "audio") {
-            const args = makeAudioArgs(info);
+            const args = makeAudioArgs(info, request);
 
             if (!args) {
                 return showError("pipeline.missing_response_data");

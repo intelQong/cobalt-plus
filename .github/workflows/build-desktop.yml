@@ -1,0 +1,116 @@
+name: Build Desktop App (Linux & Windows)
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    name: Build Linux AppImage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9.6.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Project Dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Build Web Frontend
+        run: pnpm --filter @imput/cobalt-web build
+
+      - name: Install Desktop Packaging Dependencies
+        working-directory: ./desktop
+        run: npm install
+
+      - name: Build Linux AppImage
+        working-directory: ./desktop
+        run: npm run build:linux
+
+      - name: Upload Linux AppImage Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CobaltPlusPlus-Linux-AppImage
+          path: desktop/dist/*.AppImage
+
+  build-windows:
+    name: Build Windows Portable .EXE
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9.6.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Project Dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Build Web Frontend
+        run: pnpm --filter @imput/cobalt-web build
+
+      - name: Install Desktop Packaging Dependencies
+        working-directory: ./desktop
+        run: npm install
+
+      - name: Build Windows Portable Executable
+        working-directory: ./desktop
+        run: npm run build:win
+
+      - name: Upload Windows Portable Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CobaltPlusPlus-Windows-Portable
+          path: desktop/dist/*.exe
+
+  release:
+    name: Create GitHub Release (On Version Tag)
+    needs: [build-linux, build-windows]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Linux Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: CobaltPlusPlus-Linux-AppImage
+          path: dist-release
+
+      - name: Download Windows Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: CobaltPlusPlus-Windows-Portable
+          path: dist-release
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist-release/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

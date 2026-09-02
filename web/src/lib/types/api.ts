@@ -85,6 +85,10 @@ export type CobaltLocalProcessingResponse = {
     },
 
     isHLS?: boolean,
+    trim?: {
+        start?: string,
+        end?: string,
+    },
 }
 
 export type CobaltFileUrlType = "redirect" | "tunnel";
@@ -113,7 +117,7 @@ export type CobaltServerInfo = {
 // this allows for extra properties, which is not ideal,
 // but i couldn't figure out how to make a strict partial :(
 export type CobaltSaveRequestBody =
-    { url: string } & Partial<Omit<CobaltSettings['save'], 'savingMethod'>>;
+    { url: string, trimStart?: string, trimEnd?: string } & Partial<Omit<CobaltSettings['save'], 'savingMethod'>>;
 
 export type CobaltSessionResponse = CobaltSession | CobaltErrorResponse;
 export type CobaltServerInfoResponse = CobaltServerInfo | CobaltErrorResponse;

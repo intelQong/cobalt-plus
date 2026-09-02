@@ -29,6 +29,7 @@ import loom from "./services/loom.js";
 import facebook from "./services/facebook.js";
 import bluesky from "./services/bluesky.js";
 import newgrounds from "./services/newgrounds.js";
+import ytdlp from "./services/ytdlp.js";
 
 let freebind;
 
@@ -52,17 +53,40 @@ export default async function({ host, patternMatch, params, authType }) {
             isAudioMuted = params.downloadMode === "mute";
 
         if (!testers[host]) {
-            return createResponse("error", {
-                code: "error.api.service.unsupported"
-            });
-        }
-        if (!(testers[host](patternMatch))) {
-            return createResponse("error", {
-                code: "error.api.link.unsupported",
-                context: {
-                    service: friendlyServiceName(host),
-                }
-            });
+            if (env.enableYtDlp) {
+                r = await ytdlp({
+                    url,
+                    quality: params.videoQuality,
+                    isAudioOnly,
+                    isAudioMuted,
+                    trimStart: params.trimStart,
+                    trimEnd: params.trimEnd,
+                    audioFormat: params.audioFormat
+                });
+            } else {
+                return createResponse("error", {
+                    code: "error.api.service.unsupported"
+                });
+            }
+        } else if (!(testers[host](patternMatch))) {
+            if (env.enableYtDlp) {
+                r = await ytdlp({
+                    url,
+                    quality: params.videoQuality,
+                    isAudioOnly,
+                    isAudioMuted,
+                    trimStart: params.trimStart,
+                    trimEnd: params.trimEnd,
+                    audioFormat: params.audioFormat
+                });
+            } else {
+                return createResponse("error", {
+                    code: "error.api.link.unsupported",
+                    context: {
+                        service: friendlyServiceName(host),
+                    }
+                });
+            }
         }
 
         // youtubeHLS will be fully removed in the future
@@ -267,9 +291,26 @@ export default async function({ host, patternMatch, params, authType }) {
                 break;
 
             default:
-                return createResponse("error", {
-                    code: "error.api.service.unsupported"
-                });
+                if (env.enableYtDlp) {
+                    r = await ytdlp({
+                        url,
+                        quality: params.videoQuality,
+                        isAudioOnly,
+                        isAudioMuted,
+                        trimStart: params.trimStart,
+                        trimEnd: params.trimEnd,
+                        audioFormat: params.audioFormat
+                    });
+                } else {
+                    return createResponse("error", {
+                        code: "error.api.service.unsupported"
+                    });
+                }
+        }
+
+        if (r && (params.trimStart || params.trimEnd)) {
+            r.trimStart = params.trimStart;
+            r.trimEnd = params.trimEnd;
         }
 
         if (r.isAudioOnly) {

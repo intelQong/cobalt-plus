@@ -36,6 +36,8 @@ export default function({
             subtitles: r.subtitles,
             cover: !disableMetadata ? r.cover : false,
             cropCover: !disableMetadata ? r.cropCover : false,
+            trimStart: r.trimStart,
+            trimEnd: r.trimEnd,
         },
         params = {};
 
@@ -242,6 +244,15 @@ export default function({
 
     if (defaultParams.filename && (action === "picker" || action === "audio")) {
         defaultParams.filename += `.${audioFormat}`;
+    }
+
+    if (r.trimStart || r.trimEnd) {
+        if (responseType === "redirect") {
+            responseType = "tunnel";
+            params.type = isAudioOnly ? "audio" : "remux";
+        }
+        params.trimStart = r.trimStart;
+        params.trimEnd = r.trimEnd;
     }
 
     // alwaysProxy is set to true in match.js if localProcessing is forced

@@ -129,6 +129,9 @@ export const loadEnvs = (env = process.env) => {
         // "never" | "key" | "always"
         enableDeprecatedYoutubeHls: env.ENABLE_DEPRECATED_YOUTUBE_HLS ?? "never",
 
+        enableYtDlp: env.ENABLE_YTDLP === '1' || env.ENABLE_YTDLP === 'true',
+        ytdlpPath: env.YTDLP_PATH || 'yt-dlp',
+
         envFile: env.API_ENV_FILE,
         envRemoteReloadInterval: 300,
 

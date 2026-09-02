@@ -60,5 +60,13 @@ export const apiSchema = z.object({
 
     youtubeHLS: z.boolean().default(false),
     youtubeBetterAudio: z.boolean().default(false),
+
+    trimStart: z.string()
+                .regex(/^([0-9]{1,2}:)?[0-9]{1,2}:[0-9]{1,2}(\.[0-9]+)?$|^[0-9]+(\.[0-9]+)?$/)
+                .optional(),
+
+    trimEnd: z.string()
+              .regex(/^([0-9]{1,2}:)?[0-9]{1,2}:[0-9]{1,2}(\.[0-9]+)?$|^[0-9]+(\.[0-9]+)?$/)
+              .optional(),
 })
 .strict();

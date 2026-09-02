@@ -99,7 +99,13 @@ const render = async (res, streamInfo, ffargs, estimateMultiplier) => {
 const remux = async (streamInfo, res) => {
     const format = streamInfo.filename.split('.').pop();
     const urls = Array.isArray(streamInfo.urls) ? streamInfo.urls : [streamInfo.urls];
-    const args = urls.flatMap(url => ['-i', url]);
+    const args = [];
+
+    if (streamInfo.trimStart) {
+        args.push('-ss', streamInfo.trimStart);
+    }
+
+    urls.forEach(url => args.push('-i', url));
 
     // if the stream type is merge, we expect two URLs
     if (streamInfo.type === 'merge' && urls.length !== 2) {
@@ -131,6 +137,10 @@ const remux = async (streamInfo, res) => {
         ...(streamInfo.type === 'mute' ? ['-an'] : ['-c:a', 'copy'])
     );
 
+    if (streamInfo.trimEnd) {
+        args.push('-to', streamInfo.trimEnd);
+    }
+
     if (format === 'mp4') {
         args.push('-movflags', 'faststart+frag_keyframe+empty_moov');
     }
@@ -153,11 +163,19 @@ const remux = async (streamInfo, res) => {
 }
 
 const convertAudio = async (streamInfo, res) => {
-    const args = [
-        '-i', streamInfo.urls,
-        '-vn',
-        ...(streamInfo.audioCopy ? ['-c:a', 'copy'] : ['-b:a', `${streamInfo.audioBitrate}k`]),
-    ];
+    const args = [];
+
+    if (streamInfo.trimStart) {
+        args.push('-ss', streamInfo.trimStart);
+    }
+
+    args.push('-i', streamInfo.urls);
+    args.push('-vn');
+    args.push(...(streamInfo.audioCopy ? ['-c:a', 'copy'] : ['-b:a', `${streamInfo.audioBitrate}k`]));
+
+    if (streamInfo.trimEnd) {
+        args.push('-to', streamInfo.trimEnd);
+    }
 
     if (streamInfo.audioFormat === 'mp3' && streamInfo.audioBitrate === '8') {
         args.push('-ar', '12000');
@@ -190,15 +208,24 @@ const convertAudio = async (streamInfo, res) => {
 }
 
 const convertGif = async (streamInfo, res) => {
-    const args = [
-        '-i', streamInfo.urls,
+    const args = [];
 
+    if (streamInfo.trimStart) {
+        args.push('-ss', streamInfo.trimStart);
+    }
+
+    args.push(
+        '-i', streamInfo.urls,
         '-vf',
         'scale=-1:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse',
         '-loop', '0',
+    );
 
-        '-f', 'gif', 'pipe:3',
-    ];
+    if (streamInfo.trimEnd) {
+        args.push('-to', streamInfo.trimEnd);
+    }
+
+    args.push('-f', 'gif', 'pipe:3');
 
     await render(
         res,

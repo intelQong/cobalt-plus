@@ -5,14 +5,16 @@
 
     import Skeleton from "$components/misc/Skeleton.svelte";
     import IconPlus from "@tabler/icons-svelte/IconPlus.svelte";
+    import IconSearch from "@tabler/icons-svelte/IconSearch.svelte";
     import PopoverContainer from "$components/misc/PopoverContainer.svelte";
 
     let services: string[] = [];
+    let filterQuery = $state("");
 
-    $: expanded = false;
+    let expanded = $state(false);
 
     let servicesContainer: HTMLDivElement;
-    $: loaded = false;
+    let loaded = $state(false);
 
     const loadInfo = async () => {
         await getServerInfo();
@@ -23,12 +25,18 @@
         }
     };
 
+    let filteredServices = $derived(
+        filterQuery.trim()
+            ? services.filter(s => s.toLowerCase().includes(filterQuery.toLowerCase().trim()))
+            : services
+    );
+
     const popoverAction = async () => {
         expanded = !expanded;
         if (expanded && services.length === 0) {
             await loadInfo();
         }
-        if (expanded) {
+        if (expanded && servicesContainer) {
             servicesContainer.focus();
         }
     };
@@ -38,7 +46,7 @@
     <button
         id="services-button"
         class="button"
-        on:click={popoverAction}
+        onclick={popoverAction}
         aria-label={$t(`save.services.title_${expanded ? "hide" : "show"}`)}
     >
         <div class="expand-icon">
@@ -48,14 +56,29 @@
     </button>
 
     <PopoverContainer id="services-popover" {expanded}>
+        <div class="services-header-row">
+            <div class="search-box">
+                <IconSearch size={14} class="search-icon" />
+                <input
+                    type="text"
+                    placeholder="Search services..."
+                    bind:value={filterQuery}
+                    spellcheck="false"
+                    autocomplete="off"
+                />
+            </div>
+        </div>
+
         <div
             id="services-container"
             bind:this={servicesContainer}
             tabindex="-1"
         >
             {#if loaded}
-                {#each services as service}
+                {#each filteredServices as service}
                     <div class="service-item">{service}</div>
+                {:else}
+                    <div class="no-services">No matching services</div>
                 {/each}
             {:else}
                 {#each { length: 17 } as _}
@@ -77,7 +100,7 @@
     #supported-services {
         display: flex;
         position: relative;
-        max-width: 400px;
+        max-width: 440px;
         flex-direction: column;
         align-items: center;
         height: 35px;
@@ -85,21 +108,22 @@
 
     #services-button {
         gap: 9px;
-        padding: 7px 13px 7px 10px;
+        padding: 7px 14px 7px 10px;
         justify-content: flex-start;
-        border-radius: 18px;
+        border-radius: 999px;
         display: flex;
         flex-direction: row;
         font-size: 13px;
         font-weight: 500;
-        background: none;
-        transition:
-            background 0.2s,
-            box-shadow 0.1s;
+        background: var(--button);
+        border: 1px solid var(--button-stroke);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    #services-button:not(:active) {
-        box-shadow: none;
+    #services-button:hover {
+        background: var(--button-hover);
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 16px var(--accent-glow);
     }
 
     .expand-icon {
@@ -112,37 +136,7 @@
         background: var(--button-elevated);
         padding: 0;
         box-shadow: none;
-        transition:
-            background 0.2s,
-            transform 0.2s;
-    }
-
-    #services-button:active {
-        background: var(--button-hover-transparent);
-    }
-
-    @media (hover: hover) {
-        #services-button:hover {
-            background: var(--button-hover-transparent);
-        }
-
-        #services-button:active {
-            background: var(--button-press-transparent);
-        }
-
-        #services-button:hover .expand-icon {
-            background: var(--button-elevated-hover);
-        }
-    }
-
-    @media (hover: none) {
-        #services-button:active {
-            box-shadow: none;
-        }
-    }
-
-    #services-button:active .expand-icon {
-        background: var(--button-elevated-press);
+        transition: background 0.2s, transform 0.2s;
     }
 
     .expand-icon :global(svg) {
@@ -157,26 +151,73 @@
         transform: rotate(45deg);
     }
 
+    .services-header-row {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--button-hover-transparent);
+        border: 1px solid var(--input-border);
+        border-radius: 8px;
+        padding: 4px 8px;
+    }
+
+    .search-box input {
+        border: none;
+        background: transparent;
+        color: var(--secondary);
+        font-size: 12px;
+        outline: none;
+        width: 100%;
+    }
+
+    :global(.search-icon) {
+        color: var(--gray);
+    }
+
     #services-container {
         display: flex;
         flex-wrap: wrap;
         flex-direction: row;
-        gap: 3px;
+        gap: 4px;
+        max-height: 200px;
+        overflow-y: auto;
     }
 
     .service-item {
         display: flex;
-        padding: 4px 8px;
+        padding: 4px 10px;
         border-radius: calc(var(--border-radius) / 2);
         background: var(--button-elevated);
+        border: 1px solid var(--button-stroke);
         font-size: 12.5px;
         font-weight: 500;
+        transition: all 0.15s ease;
+        cursor: default;
+    }
+
+    .service-item:hover {
+        background: var(--accent-glow);
+        color: var(--accent-primary);
+        border-color: var(--accent-primary);
+        transform: translateY(-1px);
+    }
+
+    .no-services {
+        font-size: 12px;
+        color: var(--gray);
+        padding: 8px 0;
     }
 
     #services-disclaimer {
         padding: 0;
         user-select: none;
         -webkit-user-select: none;
+        margin-top: 6px;
     }
 
     .expanded #services-disclaimer {

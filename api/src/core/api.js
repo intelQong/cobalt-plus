@@ -1,5 +1,7 @@
 import cors from "cors";
 import http from "node:http";
+import fs from "node:fs";
+import path from "node:path";
 import rateLimit from "express-rate-limit";
 import { setGlobalDispatcher, EnvHttpProxyAgent } from "undici";
 import { getCommit, getBranch, getRemote, getVersion } from "@imput/version-info";
@@ -316,18 +318,41 @@ export const runAPI = async (express, app, __dirname, isPrimary = true) => {
         return stream(res, streamInfo);
     });
 
-    app.get('/', (_, res) => {
+    const staticCandidates = [
+        env.webStaticPath,
+        path.resolve(__dirname, '../../web/build'),
+        path.resolve(__dirname, '../web/build'),
+        path.resolve(process.cwd(), 'web/build'),
+        path.resolve(process.cwd(), 'build')
+    ].filter(Boolean);
+
+    const staticDir = staticCandidates.find(p => fs.existsSync(p));
+
+    if (staticDir) {
+        app.use(express.static(staticDir));
+    }
+
+    app.get('/', (req, res) => {
+        if (staticDir && req.headers.accept?.includes('text/html')) {
+            return res.sendFile(path.join(staticDir, 'index.html'));
+        }
         res.type('json');
         res.status(200).send(env.envFile ? getServerInfo() : serverInfo);
-    })
+    });
 
     app.get('/favicon.ico', (req, res) => {
+        if (staticDir && fs.existsSync(path.join(staticDir, 'favicon.ico'))) {
+            return res.sendFile(path.join(staticDir, 'favicon.ico'));
+        }
         res.status(404).end();
-    })
+    });
 
     app.get('/*', (req, res) => {
+        if (staticDir && fs.existsSync(path.join(staticDir, 'index.html'))) {
+            return res.sendFile(path.join(staticDir, 'index.html'));
+        }
         res.redirect('/');
-    })
+    });
 
     // handle all express errors
     app.use((_, __, res, ___) => {

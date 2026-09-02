@@ -9,11 +9,11 @@
   </p>
 
   <p>
-    <a href="https://github.com/intelQong/cobalt/actions/workflows/build-desktop.yml">
-      <img src="https://img.shields.io/github/actions/workflow/status/intelQong/cobalt/build-desktop.yml?style=flat-square&label=Desktop%20Build" alt="Build Status" />
+    <a href="https://github.com/intelQong/cobalt/actions/workflows/test.yml">
+      <img src="https://img.shields.io/github/actions/workflow/status/intelQong/cobalt/test.yml?style=flat-square&label=Build%20%26%20Tests" alt="Build Status" />
     </a>
     <img src="https://img.shields.io/badge/version-11.7.1-8b5cf6?style=flat-square" alt="Version" />
-    <img src="https://img.shields.io/badge/platforms-Web%20%7C%20Linux%20%7C%20Windows-06b6d4?style=flat-square" alt="Platforms" />
+    <img src="https://img.shields.io/badge/platforms-Web%20%7C%20Docker%20%7C%20CLI-06b6d4?style=flat-square" alt="Platforms" />
     <img src="https://img.shields.io/badge/license-AGPL--3.0-emerald?style=flat-square" alt="License" />
   </p>
   <br />
@@ -92,21 +92,6 @@ node cli.js "https://youtube.com/watch?v=..." --ss 00:00:10 --to 00:00:40
 node cli.js "https://youtube.com/watch?v=..." --mode audio --format mp3 -s 01:00 -e 01:30
 ```
 
-### 3. Build Portable Desktop App
-
-```bash
-# Build Web Frontend first
-pnpm --filter @imput/cobalt-web build
-
-# Build Linux AppImage
-cd desktop && npm run build:linux
-
-# Build Windows Portable .EXE
-cd desktop && npm run build:win
-```
-
-Or download ready-to-run binaries from the **[GitHub Actions](https://github.com/intelQong/cobalt/actions)** page!
-
 ---
 
 ## 🐳 Docker Deployment
@@ -134,7 +119,6 @@ docker run -d \
 │   └── src/
 │       ├── components/  # Omnibox, VideoTrimmer, Services
 │       └── routes/      # Main landing page & Remux tool
-├── desktop/        # Electron wrapper & desktop configuration
 ├── .github/        # GitHub Actions CI/CD workflows
 ├── cli.js          # Terminal CLI video trimmer & downloader
 └── DESIGN.md       # VoltAgent awesome-design-md specification

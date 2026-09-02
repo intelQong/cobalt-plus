@@ -1,7 +1,6 @@
 <script lang="ts">
     import { t } from "$lib/i18n/translations";
     import Omnibox from "$components/save/Omnibox.svelte";
-    import Meowbalt from "$components/misc/Meowbalt.svelte";
     import SupportedServices from "$components/save/SupportedServices.svelte";
     import { trimEnabled, link } from "$lib/state/omnibox";
     import IconScissors from "@tabler/icons-svelte/IconScissors.svelte";
@@ -31,9 +30,6 @@
             </div>
 
             <div class="brand-title-row">
-                <div class="meowbalt-mini">
-                    <Meowbalt emotion="smile" />
-                </div>
                 <h1 class="brand-title">
                     cobalt<span class="neon-plus">++</span>
                 </h1>
@@ -176,20 +172,7 @@
     .brand-title-row {
         display: flex;
         align-items: center;
-        gap: 14px;
-    }
-
-    .meowbalt-mini {
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
         justify-content: center;
-        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .meowbalt-mini:hover {
-        transform: scale(1.15) rotate(-5deg);
     }
 
     .brand-title {

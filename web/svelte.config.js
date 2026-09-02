@@ -48,6 +48,10 @@ const config = {
             precompress: false,
             strict: true
         }),
+        prerender: {
+            handleHttpError: 'warn',
+            handleUnseenRoutes: 'ignore'
+        },
         csp: {
             mode: "hash",
             directives: {

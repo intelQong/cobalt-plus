@@ -8,10 +8,16 @@
         removePasskey,
         initPasskeyState
     } from "$lib/state/passkey";
+    import {
+        cloudflareAccessUser,
+        checkCloudflareAccess
+    } from "$lib/auth/cloudflare-access";
     import IconFingerprint from "@tabler/icons-svelte/IconFingerprint.svelte";
     import IconLock from "@tabler/icons-svelte/IconLock.svelte";
     import IconTrash from "@tabler/icons-svelte/IconTrash.svelte";
     import IconCheck from "@tabler/icons-svelte/IconCheck.svelte";
+    import IconShieldCheck from "@tabler/icons-svelte/IconShieldCheck.svelte";
+    import IconCloud from "@tabler/icons-svelte/IconCloud.svelte";
     import IconAlertTriangle from "@tabler/icons-svelte/IconAlertTriangle.svelte";
 
     let registering = false;
@@ -52,76 +58,105 @@
 
     onMount(() => {
         initPasskeyState();
+        checkCloudflareAccess();
     });
 </script>
 
 <div class="passkey-container">
-    {#if !$passkeySupported}
-        <div class="warning-box">
-            <IconAlertTriangle size={20} />
-            <span>WebAuthn Passkeys are not supported in this browser.</span>
-        </div>
-    {:else}
-        <div class="status-row">
-            <div class="status-indicator" class:active={$passkeyEnabled}>
-                {#if $passkeyEnabled}
-                    <IconCheck size={16} />
+    <!-- Section 1: In-App WebAuthn Passkey -->
+    <div class="auth-section">
+        {#if !$passkeySupported}
+            <div class="warning-box">
+                <IconAlertTriangle size={20} />
+                <span>WebAuthn Passkeys require a secure HTTPS domain.</span>
+            </div>
+        {:else}
+            <div class="status-row">
+                <div class="status-indicator" class:active={$passkeyEnabled}>
+                    {#if $passkeyEnabled}
+                        <IconCheck size={16} />
+                    {:else}
+                        <IconLock size={16} />
+                    {/if}
+                </div>
+                <div class="status-text">
+                    <div class="status-title">
+                        {$passkeyEnabled ? "Biometric Passkey Enabled" : "Biometric Passkey Disabled"}
+                    </div>
+                    <div class="status-desc">
+                        {$passkeyEnabled
+                            ? "Only your authorized biometric key or hardware token can unlock this instance."
+                            : "Enable Touch ID, Face ID, Windows Hello, or a security key to restrict browser access."}
+                    </div>
+                </div>
+            </div>
+
+            {#if feedback}
+                <div class="feedback-box" class:error={isError}>
+                    <span>{feedback}</span>
+                </div>
+            {/if}
+
+            <div class="actions-row">
+                {#if !$passkeyEnabled}
+                    <button
+                        type="button"
+                        class="action-btn primary"
+                        on:click={handleRegister}
+                        disabled={registering}
+                    >
+                        <IconFingerprint size={18} />
+                        <span>{registering ? "Registering..." : "Enable Biometric Passkey"}</span>
+                    </button>
                 {:else}
-                    <IconLock size={16} />
+                    <button type="button" class="action-btn secondary" on:click={handleLock}>
+                        <IconLock size={18} />
+                        <span>Lock Now</span>
+                    </button>
+                    <button type="button" class="action-btn danger" on:click={handleRemove}>
+                        <IconTrash size={18} />
+                        <span>Remove Passkey</span>
+                    </button>
                 {/if}
             </div>
-            <div class="status-text">
-                <div class="status-title">
-                    {$passkeyEnabled ? "Passkey Protection Enabled" : "Passkey Protection Disabled"}
-                </div>
-                <div class="status-desc">
-                    {$passkeyEnabled
-                        ? "Only authorized biometric or hardware keys can access this instance."
-                        : "Enable Touch ID, Face ID, Windows Hello, or a security key to restrict access."}
-                </div>
-            </div>
+        {/if}
+    </div>
+
+    <!-- Section 2: Cloudflare Zero Trust (Access) Edge Status -->
+    <div class="cf-access-section">
+        <div class="cf-header">
+            <IconCloud size={18} class="cf-icon" />
+            <span class="cf-title">Cloudflare Zero Trust (Access) Edge Gateway</span>
         </div>
 
-        {#if feedback}
-            <div class="feedback-box" class:error={isError}>
-                <span>{feedback}</span>
+        {#if $cloudflareAccessUser.authenticated}
+            <div class="cf-status-active">
+                <IconShieldCheck size={16} class="cf-shield" />
+                <span>Edge Authenticated as: <strong>{$cloudflareAccessUser.email}</strong></span>
+            </div>
+        {:else}
+            <div class="cf-status-info">
+                <span>Protect your Pages deployment at the DNS/CDN edge with Cloudflare Access (100% Free). Requires login before any assets load.</span>
             </div>
         {/if}
-
-        <div class="actions-row">
-            {#if !$passkeyEnabled}
-                <button
-                    type="button"
-                    class="action-btn primary"
-                    on:click={handleRegister}
-                    disabled={registering}
-                >
-                    <IconFingerprint size={18} />
-                    <span>{registering ? "Registering..." : "Enable Passkey Access"}</span>
-                </button>
-            {:else}
-                <button type="button" class="action-btn secondary" on:click={handleLock}>
-                    <IconLock size={18} />
-                    <span>Lock Now</span>
-                </button>
-                <button type="button" class="action-btn danger" on:click={handleRemove}>
-                    <IconTrash size={18} />
-                    <span>Remove Passkey</span>
-                </button>
-            {/if}
-        </div>
-    {/if}
+    </div>
 </div>
 
 <style>
     .passkey-container {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.25rem;
         padding: 1.25rem;
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 1.25rem;
+    }
+
+    .auth-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
     }
 
     .warning-box {
@@ -242,5 +277,48 @@
     .action-btn:disabled {
         opacity: 0.6;
         cursor: wait;
+    }
+
+    .cf-access-section {
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        padding-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .cf-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #cbd5e1;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    :global(.cf-icon) {
+        color: #f59e0b;
+    }
+
+    :global(.cf-shield) {
+        color: #10b981;
+    }
+
+    .cf-status-active {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+        border-radius: 0.5rem;
+        color: #6ee7b7;
+        font-size: 0.8125rem;
+    }
+
+    .cf-status-info {
+        font-size: 0.78125rem;
+        color: #94a3b8;
+        line-height: 1.4;
     }
 </style>

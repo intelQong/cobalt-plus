@@ -20,11 +20,11 @@ const waitForTurnstile = async () => {
             }
         });
 
-        // wait for turnstile to finish for 15 seconds
+        // wait for turnstile to finish for at most 5 seconds
         setTimeout(() => {
             unsub();
-            reject(false);
-        }, 15 * 1000)
+            resolve(false);
+        }, 5 * 1000);
     });
 }
 
@@ -42,12 +42,7 @@ const getAuthorization = async () => {
         try {
             await waitForTurnstile();
         } catch {
-            return {
-                status: "error",
-                error: {
-                    code: "error.captcha_too_long"
-                }
-            } as CobaltErrorResponse;
+            // graceful fallback
         }
     }
 

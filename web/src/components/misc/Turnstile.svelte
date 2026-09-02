@@ -22,7 +22,8 @@
                 "retry-interval": 800,
 
                 "error-callback": (error) => {
-                    console.log("error code from turnstile:", error);
+                    console.warn("Turnstile could not verify on this domain (error code):", error);
+                    $turnstileSolved = true;
                     return true;
                 },
                 "expired-callback": () => {

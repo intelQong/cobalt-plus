@@ -71,11 +71,6 @@
             <span class="shortcut-chip"><kbd>↵</kbd> Save / Download</span>
         </div>
     </main>
-
-    <div id="terms-note">
-        {$t("save.terms.note.agreement")}
-        <a href="/about/terms">{$t("save.terms.note.link")}</a>
-    </div>
 </div>
 
 <style>
@@ -267,16 +262,6 @@
 
     .shortcut-separator {
         color: var(--button-stroke);
-    }
-
-    #terms-note {
-        color: var(--gray);
-        font-size: 12px;
-        text-align: center;
-        padding-bottom: 8px;
-        font-weight: 500;
-        position: relative;
-        z-index: 1;
     }
 
     @media screen and (max-width: 535px) {

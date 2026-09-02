@@ -1,31 +1,12 @@
 <script lang="ts">
-    import settings, { updateSetting } from "$lib/state/settings";
+    import settings from "$lib/state/settings";
     import { t } from "$lib/i18n/translations";
-    import { hapticSwitch } from "$lib/haptics";
 
     import SettingsInput from "$components/settings/SettingsInput.svelte";
     import SettingsToggle from "$components/buttons/SettingsToggle.svelte";
     import SettingsCategory from "$components/settings/SettingsCategory.svelte";
     import IconServer from "@tabler/icons-svelte/IconServer.svelte";
-    import IconCheck from "@tabler/icons-svelte/IconCheck.svelte";
-
-    const communityPresets = [
-        { name: "Kwiatekm (Open)", url: "https://cobalt-api.kwiatekm.pl" },
-        { name: "Streamrip (Open)", url: "https://api.streamrip.app" },
-        { name: "XY2401 (Open)", url: "https://cobalt.xy2401.top" },
-        { name: "Hyonsu (Open)", url: "https://cobaltapi.hyonsu.com" },
-        { name: "Official (Requires Key)", url: "https://api.cobalt.tools" }
-    ];
-
-    function selectPreset(url: string) {
-        hapticSwitch();
-        updateSetting({
-            processing: {
-                enableCustomInstances: true,
-                customInstanceURL: url
-            }
-        });
-    }
+    import IconExternalLink from "@tabler/icons-svelte/IconExternalLink.svelte";
 </script>
 
 <SettingsCategory
@@ -42,33 +23,10 @@
             <SettingsInput
                 settingContext="processing"
                 settingId="customInstanceURL"
-                placeholder="https://instance.url.example/"
+                placeholder="https://api.yourdomain.com"
                 showInstanceWarning
                 altText={$t("settings.processing.custom_instance.input.alt_text")}
             />
-
-            <!-- Quick Presets -->
-            <div class="preset-section">
-                <div class="preset-header">
-                    <IconServer size={14} class="preset-icon" />
-                    <span>Quick Community Instances:</span>
-                </div>
-                <div class="preset-grid">
-                    {#each communityPresets as preset}
-                        <button
-                            type="button"
-                            class="preset-btn"
-                            class:active={$settings.processing.customInstanceURL === preset.url}
-                            on:click={() => selectPreset(preset.url)}
-                        >
-                            {#if $settings.processing.customInstanceURL === preset.url}
-                                <IconCheck size={13} class="check-icon" />
-                            {/if}
-                            <span>{preset.name}</span>
-                        </button>
-                    {/each}
-                </div>
-            </div>
         {/if}
     </div>
     <div class="subtext">
@@ -102,6 +60,31 @@
     </div>
 </SettingsCategory>
 
+<!-- Self-Hosting Free Backend Guide -->
+<div class="hosting-guide-card">
+    <div class="guide-header">
+        <IconServer size={18} class="guide-icon" />
+        <span class="guide-title">How to Run Your Own Free Private Backend</span>
+    </div>
+    <p class="guide-desc">
+        To download without captcha or rate limits, deploy the backend code (<code class="guide-code">api/</code>) to any free cloud host (Render, Fly.io, Railway, or Docker):
+    </p>
+    <div class="guide-steps">
+        <div class="guide-step">
+            <span class="step-num">1</span>
+            <span>Deploy the backend on <a href="https://render.com" target="_blank" rel="noopener noreferrer" class="guide-link">Render.com <IconExternalLink size={12} /></a> or <a href="https://fly.io" target="_blank" rel="noopener noreferrer" class="guide-link">Fly.io <IconExternalLink size={12} /></a> using Docker.</span>
+        </div>
+        <div class="guide-step">
+            <span class="step-num">2</span>
+            <span>Set environment variables: <code class="guide-code">API_AUTH_REQUIRED=false</code></span>
+        </div>
+        <div class="guide-step">
+            <span class="step-num">3</span>
+            <span>Enable <strong>"Use custom processing instance"</strong> above and paste your deployment URL.</span>
+        </div>
+    </div>
+</div>
+
 <style>
     .category-inside-group {
         display: flex;
@@ -113,68 +96,86 @@
         margin-top: -3px;
     }
 
-    .preset-section {
+    .hosting-guide-card {
+        margin-top: 1rem;
+        padding: 1.25rem;
+        background: rgba(139, 92, 246, 0.06);
+        border: 1px solid rgba(139, 92, 246, 0.25);
+        border-radius: 1rem;
         display: flex;
         flex-direction: column;
-        gap: 6px;
-        padding: 10px 12px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        border-radius: 10px;
-        margin-top: 4px;
+        gap: 0.75rem;
     }
 
-    .preset-header {
+    .guide-header {
         display: flex;
         align-items: center;
-        gap: 6px;
-        font-size: 11px;
-        font-weight: 600;
-        color: #94a3b8;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
+        gap: 0.5rem;
     }
 
-    :global(.preset-icon) {
+    :global(.guide-icon) {
         color: #a78bfa;
     }
 
-    .preset-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
+    .guide-title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: #f1f5f9;
     }
 
-    .preset-btn {
+    .guide-desc {
+        font-size: 0.8125rem;
+        color: #94a3b8;
+        line-height: 1.45;
+        margin: 0;
+    }
+
+    .guide-steps {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .guide-step {
+        display: flex;
+        align-items: baseline;
+        gap: 0.625rem;
+        font-size: 0.8125rem;
+        color: #cbd5e1;
+        line-height: 1.4;
+    }
+
+    .step-num {
         display: inline-flex;
         align-items: center;
-        gap: 4px;
-        padding: 5px 10px;
-        font-size: 11.5px;
-        font-weight: 500;
-        border-radius: 6px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #cbd5e1;
-        cursor: pointer;
-        transition: all 0.15s ease;
-    }
-
-    .preset-btn:hover {
-        background: rgba(139, 92, 246, 0.15);
-        border-color: rgba(139, 92, 246, 0.4);
-        color: #ffffff;
-    }
-
-    .preset-btn.active {
+        justify-content: center;
+        min-width: 18px;
+        height: 18px;
+        border-radius: 9999px;
         background: rgba(139, 92, 246, 0.25);
-        border-color: #8b5cf6;
         color: #c084fc;
-        font-weight: 600;
-        box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+        font-size: 10.5px;
+        font-weight: 700;
     }
 
-    :global(.check-icon) {
-        color: #10b981;
+    .guide-code {
+        padding: 0.125rem 0.375rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        color: #e2e8f0;
+        font-size: 0.75rem;
+    }
+
+    .guide-link {
+        color: #a78bfa;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+    }
+
+    .guide-link:hover {
+        text-decoration: underline;
     }
 </style>

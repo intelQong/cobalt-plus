@@ -81,7 +81,7 @@ const checkDefaultApiEnv = (): PluginOption => ({
     name: "check-default-api",
     config() {
         if (!process.env.WEB_DEFAULT_API) {
-            process.env.WEB_DEFAULT_API = process.env.API_URL || "https://cobalt-api.kwiatekm.pl";
+            process.env.WEB_DEFAULT_API = process.env.API_URL || "https://api.cobalt.tools";
         }
     },
 });

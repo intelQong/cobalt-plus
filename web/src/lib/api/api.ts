@@ -3,7 +3,7 @@ import { get } from "svelte/store";
 import settings from "$lib/state/settings";
 
 import { getSession, resetSession } from "$lib/api/session";
-import { currentApiURL, rotateToNextCommunityInstance } from "$lib/api/api-url";
+import { currentApiURL } from "$lib/api/api-url";
 import { turnstileEnabled, turnstileSolved } from "$lib/state/turnstile";
 import cachedInfo from "$lib/state/server-info";
 import { getServerInfo } from "$lib/api/server-info";
@@ -59,7 +59,23 @@ const getAuthorization = async () => {
     }
 }
 
-const executeRequest = async (api: string, requestBody: CobaltSaveRequestBody, authorization?: string | CobaltErrorResponse): Promise<Optional<CobaltAPIResponse>> => {
+const request = async (requestBody: CobaltSaveRequestBody, justRetried = false): Promise<Optional<CobaltAPIResponse>> => {
+    await getServerInfo();
+
+    const getCachedInfo = get(cachedInfo);
+
+    if (!getCachedInfo) {
+        return {
+            status: "error",
+            error: {
+                code: "error.api.unreachable"
+            }
+        } as CobaltErrorResponse;
+    }
+
+    const api = currentApiURL();
+    const authorization = await getAuthorization();
+
     if (authorization && typeof authorization !== "string") {
         return authorization;
     }
@@ -69,7 +85,7 @@ const executeRequest = async (api: string, requestBody: CobaltSaveRequestBody, a
         extraHeaders["Authorization"] = authorization;
     }
 
-    return await fetch(api, {
+    const response: Optional<CobaltAPIResponse> = await fetch(api, {
         method: "POST",
         redirect: "manual",
         signal: AbortSignal.timeout(20000),
@@ -92,41 +108,15 @@ const executeRequest = async (api: string, requestBody: CobaltSaveRequestBody, a
         }
         return undefined;
     });
-};
-
-const request = async (requestBody: CobaltSaveRequestBody, attempt = 0): Promise<Optional<CobaltAPIResponse>> => {
-    await getServerInfo();
-
-    let api = currentApiURL();
-    let authorization = await getAuthorization();
-
-    let response = await executeRequest(api, requestBody, authorization);
-
-    // If request failed with auth token missing/invalid or unreachable, and custom instance is NOT locked by user:
-    const isAuthError = response?.status === 'error' && (
-        response.error.code === 'error.api.auth.jwt.missing' ||
-        response.error.code === 'error.api.auth.jwt.invalid' ||
-        response.error.code === 'error.api.auth.turnstile.missing' ||
-        response.error.code === 'error.api.timed_out' ||
-        !response
-    );
-
-    const hasUserCustomInstance = get(settings).processing.enableCustomInstances && get(settings).processing.customInstanceURL.length > 0;
-
-    if (isAuthError && !hasUserCustomInstance && attempt < 3) {
-        console.warn(`Instance ${api} returned error, rotating to next community instance...`);
-        rotateToNextCommunityInstance();
-        resetSession();
-        return request(requestBody, attempt + 1);
-    }
 
     if (
         response?.status === 'error'
             && response?.error.code === 'error.api.auth.jwt.invalid'
-            && attempt === 0
+            && !justRetried
     ) {
         resetSession();
-        return request(requestBody, attempt + 1);
+        await getAuthorization();
+        return request(requestBody, true);
     }
 
     return response;

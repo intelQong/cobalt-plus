@@ -30,6 +30,8 @@
     import DialogHolder from "$components/dialog/DialogHolder.svelte";
     import ProcessingQueue from "$components/queue/ProcessingQueue.svelte";
     import UpdateNotification from "$components/misc/UpdateNotification.svelte";
+    import PasskeyLockScreen from "$components/auth/PasskeyLockScreen.svelte";
+    import { passkeyLocked, initPasskeyState } from "$lib/state/passkey";
 
     $: reduceMotion =
         $settings.accessibility.reduceMotion || device.prefers.reducedMotion;
@@ -53,6 +55,7 @@
 
     onMount(() => {
         preloadAssets = true;
+        initPasskeyState();
     });
 </script>
 
@@ -96,6 +99,9 @@
     data-theme={browser ? $currentTheme : undefined}
     lang={$locale}
 >
+    {#if $passkeyLocked}
+        <PasskeyLockScreen />
+    {/if}
     {#if preloadAssets}
         <div id="preload" aria-hidden="true">??</div>
     {/if}

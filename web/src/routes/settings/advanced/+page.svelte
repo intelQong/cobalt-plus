@@ -5,7 +5,12 @@
     import ManageSettings from "$components/settings/ManageSettings.svelte";
     import SettingsCategory from "$components/settings/SettingsCategory.svelte";
     import ClearStorageButton from "$components/settings/ClearStorageButton.svelte";
+    import PasskeySettings from "$components/auth/PasskeySettings.svelte";
 </script>
+
+<SettingsCategory sectionId="passkey-security" title="Passkey Access Control">
+    <PasskeySettings />
+</SettingsCategory>
 
 <SettingsCategory sectionId="debug" title={$t("settings.advanced.debug")}>
     <SettingsToggle

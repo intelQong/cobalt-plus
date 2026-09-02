@@ -49,11 +49,11 @@ Paste the link, adjust your trim timestamps, download, and move on.
 - Integrated `yt-dlp` engine for stream extraction, high-res audio/video formats, and partial section downloading (`--download-sections`).
 - Fully compliant with GitHub Terms of Service and open-source licensing.
 
-### 💻 Standalone Portable Desktop App
-- Packaged with Electron for zero-install portability:
-  - 🐧 **Linux:** Single `.AppImage` (runs across Ubuntu, Fedora, Debian, Arch).
-  - 🪟 **Windows:** Single Portable `.exe` (no installer needed, runs from USB).
-- Multi-platform automated builds powered by **GitHub Actions** ([`.github/workflows/build-desktop.yml`](.github/workflows/build-desktop.yml)).
+### 🔐 WebAuthn / Passkey Access Control
+- Restrict access to your personal instance using **FIDO2 / WebAuthn Passkeys** (Touch ID, Face ID, Windows Hello, or YubiKey).
+- Obsidian Void biometric lock screen with keyboard shortcuts (`↵` / `Space` to authenticate).
+- Easily manage, lock, or revoke passkeys in **Settings > Advanced**.
+- Fully compatible with **Cloudflare Zero Trust (Access)** at the edge.
 
 ### ⌨️ Terminal Trimming CLI (`cli.js`)
 - Save and trim media directly from your command line:

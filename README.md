@@ -94,7 +94,33 @@ node cli.js "https://youtube.com/watch?v=..." --mode audio --format mp3 -s 01:00
 
 ---
 
-## 🐳 Docker Deployment
+## ☁️ Cloudflare Pages Hosting (100% Free)
+
+You can host the Cobalt++ frontend on Cloudflare Pages for free with zero maintenance:
+
+### Option A: Connect directly via Cloudflare Dashboard (Recommended)
+1. Go to **[Cloudflare Dashboard](https://dash.cloudflare.com/)** > **Workers & Pages** > **Create application** > **Pages** > **Connect to Git**.
+2. Select repository: `intelQong/cobalt-plus`.
+3. Set the build configuration:
+   - **Framework preset:** `None`
+   - **Build command:** `pnpm --filter @imput/cobalt-web build`
+   - **Build output directory:** `web/build`
+   - **Root directory:** `/`
+4. Add Environment Variables under **Settings** > **Environment variables**:
+   - `WEB_DEFAULT_API` = `https://api.yourdomain.com` *(your backend API URL or public instance)*
+   - `NODE_VERSION` = `20`
+5. Click **Save and Deploy**. Your site will be live instantly with a free `*.pages.dev` domain and global CDN!
+
+### Option B: Automated Deploy via GitHub Actions
+Add your Cloudflare credentials in GitHub repository secrets:
+- `CLOUDFLARE_API_TOKEN`: Your Cloudflare API token with Pages edit permissions.
+- `CLOUDFLARE_ACCOUNT_ID`: Your Cloudflare Account ID.
+
+Every push to `main` will build and deploy automatically via [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml).
+
+---
+
+## 🐳 Docker Deployment (Backend & Full-Stack)
 
 ```bash
 docker run -d \

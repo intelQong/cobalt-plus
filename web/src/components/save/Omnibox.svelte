@@ -277,21 +277,25 @@
     }
 
     #input-container {
-        --input-padding: 11px;
+        --input-padding: 12px;
         display: flex;
-        background: var(--button-hover-transparent);
-        backdrop-filter: blur(16px);
-        box-shadow: 0 0 0 1.5px var(--input-border) inset;
-        /* webkit can't render the 1.5px box shadow properly,
-           so we duplicate the border as outline to fix it visually */
-        outline: 1.5px solid var(--input-border);
-        outline-offset: -1.5px;
+        background: rgba(18, 18, 28, 0.7);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(139, 92, 246, 0.25);
         border-radius: var(--border-radius);
         align-items: center;
         gap: var(--input-padding);
-        font-size: 14px;
+        font-size: 14.5px;
         flex: 1;
-        transition: outline 0.15s, box-shadow 0.15s, background 0.15s;
+        box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.6);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #input-container:hover {
+        border-color: rgba(139, 92, 246, 0.45);
+        box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.7),
+                    0 0 20px rgba(139, 92, 246, 0.2);
     }
 
     #input-container:not(.clear-visible) :global(#clear-button) {
@@ -320,10 +324,11 @@
     }
 
     #input-container.focused {
-        box-shadow: none;
+        border-color: var(--accent-primary);
         outline: var(--accent-primary) 2px solid;
         outline-offset: -1px;
-        box-shadow: 0 0 24px var(--accent-glow);
+        box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.8),
+                    0 0 32px var(--accent-glow);
     }
 
     #input-container.focused :global(#input-icons svg) {

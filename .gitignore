@@ -1,22 +1,46 @@
 # OS directory info files
 .DS_Store
 desktop.ini
+Thumbs.db
 
-# node
-node_modules
+# Dependencies
+node_modules/
+.pnpm-store/
 
-# static build
-build
+# Builds & Outputs
+build/
+dist/
+.svelte-kit/
+/package/
 
-# secrets
+# Environment variables & Secrets
 .env
 .env.*
 !.env.example
+*.env.local
 cookies.json
 keys.json
 
-# docker
-docker-compose.yml
+# Cloudflare & Deployment
+.wrangler/
 
-# ide
-.vscode
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Docker
+docker-compose.yml
+docker-compose.override.yml
+
+# IDE & Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

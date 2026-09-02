@@ -5,16 +5,14 @@
   </p>
   <h1>cobalt++</h1>
   <p>
-    <strong>The ultimate media downloader and video trimmer — fast, privacy-focused, and ad-free.</strong>
+    <strong>The ultimate open-source media saver and video trimmer — fast, privacy-focused, and ad-free.</strong>
   </p>
 
   <p>
-    <a href="https://github.com/intelQong/cobalt/actions/workflows/test.yml">
-      <img src="https://img.shields.io/github/actions/workflow/status/intelQong/cobalt/test.yml?style=flat-square&label=Build%20%26%20Tests" alt="Build Status" />
-    </a>
     <img src="https://img.shields.io/badge/version-11.7.1-8b5cf6?style=flat-square" alt="Version" />
     <img src="https://img.shields.io/badge/platforms-Web%20%7C%20Docker%20%7C%20CLI-06b6d4?style=flat-square" alt="Platforms" />
     <img src="https://img.shields.io/badge/license-AGPL--3.0-emerald?style=flat-square" alt="License" />
+    <img src="https://img.shields.io/badge/deployment-Cloudflare%20Pages-f38020?style=flat-square" alt="Cloudflare Pages" />
   </p>
   <br />
 </div>
@@ -23,113 +21,92 @@
 
 ## ⚡ What is Cobalt++?
 
-**Cobalt++** is an enhanced, high-performance edition of Cobalt designed to save, remux, and trim media from YouTube, Twitter/X, TikTok, Instagram, Reddit, and dozens of other platforms without ads, trackers, paywalls, or bloat.
+**Cobalt++** is an enhanced, high-performance web and CLI application to save, remux, and trim media from YouTube, Twitter/X, TikTok, Instagram, Reddit, and dozens of other platforms without ads, trackers, paywalls, or bloat.
 
-Paste the link, adjust your trim timestamps, download, and move on.
+Paste the link, adjust your trim timestamps with the interactive timeline slider, download, and move on.
 
 ---
 
-## ✨ Features & Enhancements
+## ✨ Features & Highlights
 
-### 🎨 Modern Void UI Redesign (`awesome-design-md`)
-- Conforms to the [VoltAgent awesome-design-md](https://github.com/voltagent/awesome-design-md) design specification ([DESIGN.md](DESIGN.md)).
-- **Obsidian Dark Canvas (`#08080c`)** with soft ambient radial violet luminescence.
-- **Glassmorphic Cards** with translucent frosted borders and 24px glowing focus rings.
-- **Keyboard Shortcuts:** `⌘V` (Paste), `T` (Toggle Trimmer), `↵` (Save/Download).
-- **Instant Search:** Real-time filter drawer for supported services.
+### 🎚️ Dual-Handle Slider-Style Video Trimmer
+- **Dual Range Timeline Track:** Drag the Start handle and End handle freely along a glowing violet gradient range track.
+- **Dynamic Timeline Scaling:** Auto-scales from short clips up to full-length videos.
+- **Precision Step Adjusters:** Fine-tune with dedicated `[-5s]`, `[-1s]`, `[+1s]`, `[+5s]` buttons.
+- **Direct Timestamp Typing:** Click and type exact timestamps (`00:01:45`) or drag thumbs seamlessly.
+- **Quick Presets:** Instant duration pills for `Full Video`, `15s`, `30s`, `60s`, and `3 min`.
+- **In-Browser WebAssembly Processing:** Zero-server video trimming powered by `libav.js`.
 
-### ✂️ Interactive Video Trimming
-- **Dual Time Inputs:** Set custom start and end timestamps (`00:00:15` to `00:00:45`).
-- **Live Duration Calculation:** Instant badge showing total trimmed duration.
-- **Quick Preset Pills:** `15s`, `30s`, `60s`, or `Full Video` with a single click.
-- **Client & Server Trimming:** In-browser WebAssembly trimming via `libav.js` and server-side FFmpeg `-ss`/`-to` stream processing.
-- **Local File Trimming:** Built directly into the in-browser Remux tool (`/remux`).
+### 🌐 Embedded Open Community Backends & Auto-Failover
+- **Pre-Configured Instance Pool:** Works out of the box with zero server setup using fast, open community instances.
+- **Automatic High-Availability Failover:** If an instance experiences downtime or rate limits, requests automatically rotate to the next healthy backend without user interruption.
+- **Custom Instance Support:** Easily switch between public or self-hosted instances in **Settings ➔ Instances**.
 
-### 🚀 `yt-dlp` Extractor & Fallback Engine
-- Integrated `yt-dlp` engine for stream extraction, high-res audio/video formats, and partial section downloading (`--download-sections`).
-- Fully compliant with GitHub Terms of Service and open-source licensing.
+### 🔐 WebAuthn Passkeys & Cloudflare Zero Trust (Access)
+- **Biometric Passkey Access Control:** Restrict app access using **Touch ID, Face ID, Windows Hello, or YubiKey**.
+- **Obsidian Lock Screen:** Clean biometric unlock overlay with keyboard shortcuts (`↵` / `Space`).
+- **Cloudflare Access Identity Detection:** Seamlessly integrates with Cloudflare Zero Trust edge policies.
 
-### 🔐 WebAuthn / Passkey Access Control
-- Restrict access to your personal instance using **FIDO2 / WebAuthn Passkeys** (Touch ID, Face ID, Windows Hello, or YubiKey).
-- Obsidian Void biometric lock screen with keyboard shortcuts (`↵` / `Space` to authenticate).
-- Easily manage, lock, or revoke passkeys in **Settings > Advanced**.
-- Fully compatible with **Cloudflare Zero Trust (Access)** at the edge.
+### 🎨 Clean Modern Void UI (`awesome-design-md`)
+- **Obsidian Dark Theme (`#08080c`)** with subtle ambient luminescence.
+- **Glassmorphic Omnibox** with radiant focus rings.
+- **Keyboard Shortcuts:** `⌘V` (Paste), `T` (Toggle Trimmer), `↵` (Save).
 
-### ⌨️ Terminal Trimming CLI (`cli.js`)
-- Save and trim media directly from your command line:
+### 💻 Terminal Trimming CLI (`cli.js`)
+- Save and trim media directly from the command line:
   ```bash
-  node cli.js "https://youtube.com/watch?v=..." --ss 00:15 --to 00:45
+  node cli.js "https://youtube.com/watch?v=..." --ss 00:00:15 --to 00:00:45
   ```
 
 ---
 
-## 🚀 Quick Start
-
-### 1. Web & Development Setup
+## 🚀 Quick Start (Local Development)
 
 ```bash
-# Clone the repository
-git clone https://github.com/intelQong/cobalt.git
-cd cobalt
+# 1. Clone the repository
+git clone https://github.com/intelQong/cobalt-plus.git
+cd cobalt-plus
 
-# Install dependencies
+# 2. Install dependencies
 pnpm install
 
-# Start development server
-pnpm run dev
+# 3. Start development server
+pnpm --filter @imput/cobalt-web dev
 ```
 
-### 2. Terminal CLI Usage
-
-```bash
-# Basic download
-node cli.js "https://youtube.com/watch?v=..."
-
-# Download trimmed section
-node cli.js "https://youtube.com/watch?v=..." --ss 00:00:10 --to 00:00:40
-
-# Extract trimmed audio as MP3
-node cli.js "https://youtube.com/watch?v=..." --mode audio --format mp3 -s 01:00 -e 01:30
-```
+Visit `http://localhost:5173` to explore the app!
 
 ---
 
-## ☁️ Cloudflare Pages Hosting (100% Free)
+## ☁️ Deploy to Cloudflare Pages (100% Free)
 
-You can host the Cobalt++ frontend on Cloudflare Pages for free with zero maintenance:
+You can host the static frontend on Cloudflare Pages for free with global CDN caching:
 
-### Option A: Connect directly via Cloudflare Dashboard (Recommended)
-1. Go to **[Cloudflare Dashboard](https://dash.cloudflare.com/)** > **Workers & Pages** > **Create application** > **Pages** > **Connect to Git**.
-2. Select repository: `intelQong/cobalt-plus`.
+### Method 1: Connect via Cloudflare Dashboard (Recommended)
+1. Go to **[Cloudflare Dashboard](https://dash.cloudflare.com/)** ➔ **Workers & Pages** ➔ **Create application** ➔ **Pages** ➔ **Connect to Git**.
+2. Select your repository.
 3. Set the build configuration:
    - **Framework preset:** `None`
    - **Build command:** `pnpm --filter @imput/cobalt-web build`
    - **Build output directory:** `web/build`
    - **Root directory:** `/`
-4. Add Environment Variables under **Settings** > **Environment variables**:
-   - `WEB_DEFAULT_API` = `https://api.yourdomain.com` *(your backend API URL or public instance)*
+4. Set Environment Variables under **Settings ➔ Environment variables**:
    - `NODE_VERSION` = `20`
-5. Click **Save and Deploy**. Your site will be live instantly with a free `*.pages.dev` domain and global CDN!
-
-### Option B: Automated Deploy via GitHub Actions
-Add your Cloudflare credentials in GitHub repository secrets:
-- `CLOUDFLARE_API_TOKEN`: Your Cloudflare API token with Pages edit permissions.
-- `CLOUDFLARE_ACCOUNT_ID`: Your Cloudflare Account ID.
-
-Every push to `main` will build and deploy automatically via [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml).
+5. Click **Save and Deploy**. Your site will be live on a free `*.pages.dev` subdomain!
 
 ---
 
-## 🐳 Docker Deployment (Backend & Full-Stack)
+## ⌨️ CLI Usage
 
 ```bash
-docker run -d \
-  --name cobalt-plus-plus \
-  --restart unless-stopped \
-  -p 9000:9000 \
-  -e API_URL="https://api.yourdomain.com" \
-  -e ENABLE_YTDLP=1 \
-  ghcr.io/imputnet/cobalt:11
+# Basic download
+node cli.js "https://youtube.com/watch?v=..."
+
+# Download and trim a video segment
+node cli.js "https://youtube.com/watch?v=..." --ss 00:00:10 --to 00:00:40
+
+# Extract trimmed audio as MP3
+node cli.js "https://youtube.com/watch?v=..." --mode audio --format mp3 -s 01:00 -e 01:30
 ```
 
 ---
@@ -139,15 +116,16 @@ docker run -d \
 ```
 ├── api/            # Express & Node.js backend streaming API
 │   └── src/
-│       ├── processing/  # Service handlers & yt-dlp extractor
+│       ├── processing/  # Stream extraction & yt-dlp handlers
 │       └── stream/      # FFmpeg stream pipeline & trimming
-├── web/            # SvelteKit 5 + TypeScript frontend application
+├── web/            # SvelteKit 5 + TypeScript static frontend
 │   └── src/
-│       ├── components/  # Omnibox, VideoTrimmer, Services
-│       └── routes/      # Main landing page & Remux tool
+│       ├── components/  # Omnibox, VideoTrimmer, Passkey, UI
+│       ├── lib/         # WebAuthn, Failover API, Task Queue
+│       └── routes/      # Save (Home), Remux, Settings
 ├── .github/        # GitHub Actions CI/CD workflows
-├── cli.js          # Terminal CLI video trimmer & downloader
-└── DESIGN.md       # VoltAgent awesome-design-md specification
+├── cli.js          # Cross-platform CLI trimmer & downloader
+└── DESIGN.md       # VoltAgent design specification
 ```
 
 ---

@@ -3,7 +3,7 @@ import { get } from "svelte/store";
 import settings from "$lib/state/settings";
 
 import { getSession, resetSession } from "$lib/api/session";
-import { currentApiURL } from "$lib/api/api-url";
+import { currentApiURL, rotateToNextCommunityInstance } from "$lib/api/api-url";
 import { turnstileEnabled, turnstileSolved } from "$lib/state/turnstile";
 import cachedInfo from "$lib/state/server-info";
 import { getServerInfo } from "$lib/api/server-info";
@@ -12,7 +12,7 @@ import type { Optional } from "$lib/types/generic";
 import type { CobaltAPIResponse, CobaltErrorResponse, CobaltSaveRequestBody } from "$lib/types/api";
 
 const waitForTurnstile = async () => {
-    return await new Promise((resolve, reject) => {
+    return await new Promise((resolve) => {
         const unsub = turnstileSolved.subscribe((solved) => {
             if (solved) {
                 unsub();
@@ -20,11 +20,11 @@ const waitForTurnstile = async () => {
             }
         });
 
-        // wait for turnstile to finish for at most 5 seconds
+        // wait for turnstile for at most 3 seconds
         setTimeout(() => {
             unsub();
             resolve(false);
-        }, 5 * 1000);
+        }, 3 * 1000);
     });
 }
 
@@ -59,36 +59,17 @@ const getAuthorization = async () => {
     }
 }
 
-const request = async (requestBody: CobaltSaveRequestBody, justRetried = false) => {
-    await getServerInfo();
-
-    const getCachedInfo = get(cachedInfo);
-
-    if (!getCachedInfo) {
-        return {
-            status: "error",
-            error: {
-                code: "error.api.unreachable"
-            }
-        } as CobaltErrorResponse;
-    }
-
-    const api = currentApiURL();
-    const authorization = await getAuthorization();
-
+const executeRequest = async (api: string, requestBody: CobaltSaveRequestBody, authorization?: string | CobaltErrorResponse): Promise<Optional<CobaltAPIResponse>> => {
     if (authorization && typeof authorization !== "string") {
         return authorization;
     }
 
-    let extraHeaders = {};
-
-    if (authorization) {
-        extraHeaders = {
-            "Authorization": authorization
-        }
+    let extraHeaders: Record<string, string> = {};
+    if (authorization && typeof authorization === "string") {
+        extraHeaders["Authorization"] = authorization;
     }
 
-    const response: Optional<CobaltAPIResponse> = await fetch(api, {
+    return await fetch(api, {
         method: "POST",
         redirect: "manual",
         signal: AbortSignal.timeout(20000),
@@ -109,16 +90,43 @@ const request = async (requestBody: CobaltSaveRequestBody, justRetried = false) 
                 }
             } as CobaltErrorResponse;
         }
+        return undefined;
     });
+};
+
+const request = async (requestBody: CobaltSaveRequestBody, attempt = 0): Promise<Optional<CobaltAPIResponse>> => {
+    await getServerInfo();
+
+    let api = currentApiURL();
+    let authorization = await getAuthorization();
+
+    let response = await executeRequest(api, requestBody, authorization);
+
+    // If request failed with auth token missing/invalid or unreachable, and custom instance is NOT locked by user:
+    const isAuthError = response?.status === 'error' && (
+        response.error.code === 'error.api.auth.jwt.missing' ||
+        response.error.code === 'error.api.auth.jwt.invalid' ||
+        response.error.code === 'error.api.auth.turnstile.missing' ||
+        response.error.code === 'error.api.timed_out' ||
+        !response
+    );
+
+    const hasUserCustomInstance = get(settings).processing.enableCustomInstances && get(settings).processing.customInstanceURL.length > 0;
+
+    if (isAuthError && !hasUserCustomInstance && attempt < 3) {
+        console.warn(`Instance ${api} returned error, rotating to next community instance...`);
+        rotateToNextCommunityInstance();
+        resetSession();
+        return request(requestBody, attempt + 1);
+    }
 
     if (
         response?.status === 'error'
             && response?.error.code === 'error.api.auth.jwt.invalid'
-            && !justRetried
+            && attempt === 0
     ) {
         resetSession();
-        await getAuthorization();
-        return request(requestBody, true);
+        return request(requestBody, attempt + 1);
     }
 
     return response;

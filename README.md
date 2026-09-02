@@ -1,61 +1,153 @@
 <div align="center">
-    <br/>
-    <p>
-        <img src="web/static/favicon.png" title="cobalt" alt="cobalt logo" width="100" />
-    </p>
-    <p>
-        best way to save what you love
-        <br/>
-        <a href="https://cobalt.tools">
-            cobalt.tools
-        </a>
-    </p>
-    <p>
-        <a href="https://discord.gg/pQPt8HBUPu">
-            💬 community discord server
-        </a>
-        <br/>
-        <a href="https://x.com/justusecobalt">
-            🐦 twitter
-        </a>
-        <a href="https://bsky.app/profile/cobalt.tools">
-            🦋 bluesky
-        </a>
-    </p>
-    <br/>
+  <br />
+  <p>
+    <img src="web/static/favicon.png" title="Cobalt++" alt="Cobalt++ logo" width="100" />
+  </p>
+  <h1>cobalt++</h1>
+  <p>
+    <strong>The ultimate media downloader and video trimmer — fast, privacy-focused, and ad-free.</strong>
+  </p>
+
+  <p>
+    <a href="https://github.com/intelQong/cobalt/actions/workflows/build-desktop.yml">
+      <img src="https://img.shields.io/github/actions/workflow/status/intelQong/cobalt/build-desktop.yml?style=flat-square&label=Desktop%20Build" alt="Build Status" />
+    </a>
+    <img src="https://img.shields.io/badge/version-11.7.1-8b5cf6?style=flat-square" alt="Version" />
+    <img src="https://img.shields.io/badge/platforms-Web%20%7C%20Linux%20%7C%20Windows-06b6d4?style=flat-square" alt="Platforms" />
+    <img src="https://img.shields.io/badge/license-AGPL--3.0-emerald?style=flat-square" alt="License" />
+  </p>
+  <br />
 </div>
 
-cobalt is a media downloader that doesn't piss you off. it's friendly, efficient, and doesn't have ads, trackers, paywalls or other nonsense.
+---
 
-paste the link, get the file, move on. that simple, just how it should be.
+## ⚡ What is Cobalt++?
 
-### cobalt monorepo
-this monorepo includes source code for api, frontend, and related packages:
-- [api tree & readme](/api/)
-- [web tree & readme](/web/)
-- [packages tree](/packages/)
+**Cobalt++** is an enhanced, high-performance edition of Cobalt designed to save, remux, and trim media from YouTube, Twitter/X, TikTok, Instagram, Reddit, and dozens of other platforms without ads, trackers, paywalls, or bloat.
 
-it also includes documentation in the [docs tree](/docs/):
-- [how to run a cobalt instance](/docs/run-an-instance.md)
-- [how to protect a cobalt instance](/docs/protect-an-instance.md)
-- [cobalt api instance environment variables](/docs/api-env-variables.md)
-- [cobalt api documentation](/docs/api.md)
+Paste the link, adjust your trim timestamps, download, and move on.
 
-### ethics
-cobalt is a tool that makes downloading public content easier. it takes **zero liability**.
-the end user is responsible for what they download, how they use and distribute that content.
-cobalt never caches any content, it [works like a fancy proxy](/api/src/stream/).
+---
 
-cobalt is in no way a piracy tool and cannot be used as such.
-it can only download free & publicly accessible content.
-same content can be downloaded via dev tools of any modern web browser.
+## ✨ Features & Enhancements
 
-### contributing
-if you're considering contributing to cobalt, first of all, thank you! check the [contribution guidelines here](/CONTRIBUTING.md) before getting started, they'll help you do your best right away.
+### 🎨 Modern Void UI Redesign (`awesome-design-md`)
+- Conforms to the [VoltAgent awesome-design-md](https://github.com/voltagent/awesome-design-md) design specification ([DESIGN.md](DESIGN.md)).
+- **Obsidian Dark Canvas (`#08080c`)** with soft ambient radial violet luminescence.
+- **Glassmorphic Cards** with translucent frosted borders and 24px glowing focus rings.
+- **Keyboard Shortcuts:** `⌘V` (Paste), `T` (Toggle Trimmer), `↵` (Save/Download).
+- **Instant Search:** Real-time filter drawer for supported services.
 
-### thank you
-cobalt is sponsored by [royalehosting.net](https://royalehosting.net/?partner=cobalt). a part of our infrastructure is hosted on their network. we really appreciate their kindness and support!
+### ✂️ Interactive Video Trimming
+- **Dual Time Inputs:** Set custom start and end timestamps (`00:00:15` to `00:00:45`).
+- **Live Duration Calculation:** Instant badge showing total trimmed duration.
+- **Quick Preset Pills:** `15s`, `30s`, `60s`, or `Full Video` with a single click.
+- **Client & Server Trimming:** In-browser WebAssembly trimming via `libav.js` and server-side FFmpeg `-ss`/`-to` stream processing.
+- **Local File Trimming:** Built directly into the in-browser Remux tool (`/remux`).
 
-### licenses
-for relevant licensing information, see the [api](api/README.md) and [web](web/README.md) READMEs.
-unless specified otherwise, the remainder of this repository is licensed under [AGPL-3.0](LICENSE).
+### 🚀 `yt-dlp` Extractor & Fallback Engine
+- Integrated `yt-dlp` engine for stream extraction, high-res audio/video formats, and partial section downloading (`--download-sections`).
+- Fully compliant with GitHub Terms of Service and open-source licensing.
+
+### 💻 Standalone Portable Desktop App
+- Packaged with Electron for zero-install portability:
+  - 🐧 **Linux:** Single `.AppImage` (runs across Ubuntu, Fedora, Debian, Arch).
+  - 🪟 **Windows:** Single Portable `.exe` (no installer needed, runs from USB).
+- Multi-platform automated builds powered by **GitHub Actions** ([`.github/workflows/build-desktop.yml`](.github/workflows/build-desktop.yml)).
+
+### ⌨️ Terminal Trimming CLI (`cli.js`)
+- Save and trim media directly from your command line:
+  ```bash
+  node cli.js "https://youtube.com/watch?v=..." --ss 00:15 --to 00:45
+  ```
+
+---
+
+## 🚀 Quick Start
+
+### 1. Web & Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/intelQong/cobalt.git
+cd cobalt
+
+# Install dependencies
+pnpm install
+
+# Start development server
+pnpm run dev
+```
+
+### 2. Terminal CLI Usage
+
+```bash
+# Basic download
+node cli.js "https://youtube.com/watch?v=..."
+
+# Download trimmed section
+node cli.js "https://youtube.com/watch?v=..." --ss 00:00:10 --to 00:00:40
+
+# Extract trimmed audio as MP3
+node cli.js "https://youtube.com/watch?v=..." --mode audio --format mp3 -s 01:00 -e 01:30
+```
+
+### 3. Build Portable Desktop App
+
+```bash
+# Build Web Frontend first
+pnpm --filter @imput/cobalt-web build
+
+# Build Linux AppImage
+cd desktop && npm run build:linux
+
+# Build Windows Portable .EXE
+cd desktop && npm run build:win
+```
+
+Or download ready-to-run binaries from the **[GitHub Actions](https://github.com/intelQong/cobalt/actions)** page!
+
+---
+
+## 🐳 Docker Deployment
+
+```bash
+docker run -d \
+  --name cobalt-plus-plus \
+  --restart unless-stopped \
+  -p 9000:9000 \
+  -e API_URL="https://api.yourdomain.com" \
+  -e ENABLE_YTDLP=1 \
+  ghcr.io/imputnet/cobalt:11
+```
+
+---
+
+## 📂 Project Structure
+
+```
+├── api/            # Express & Node.js backend streaming API
+│   └── src/
+│       ├── processing/  # Service handlers & yt-dlp extractor
+│       └── stream/      # FFmpeg stream pipeline & trimming
+├── web/            # SvelteKit 5 + TypeScript frontend application
+│   └── src/
+│       ├── components/  # Omnibox, VideoTrimmer, Services
+│       └── routes/      # Main landing page & Remux tool
+├── desktop/        # Electron wrapper & desktop configuration
+├── .github/        # GitHub Actions CI/CD workflows
+├── cli.js          # Terminal CLI video trimmer & downloader
+└── DESIGN.md       # VoltAgent awesome-design-md specification
+```
+
+---
+
+## ⚖️ Ethics & Disclaimer
+
+Cobalt++ is a tool designed to make accessing and trimming publicly available content convenient for end users. It takes **zero liability**. The end user is responsible for the content they download, how they use it, and how they distribute it. Cobalt++ never caches downloaded content.
+
+---
+
+## 📄 License
+
+Unless specified otherwise in individual subdirectories, this project is licensed under [AGPL-3.0](LICENSE).

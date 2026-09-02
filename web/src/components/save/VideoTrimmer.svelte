@@ -2,11 +2,7 @@
     import { trimStart, trimEnd, trimEnabled } from "$lib/state/omnibox";
     import { hapticSwitch } from "$lib/haptics";
     import IconScissors from "@tabler/icons-svelte/IconScissors.svelte";
-    import IconClock from "@tabler/icons-svelte/IconClock.svelte";
     import IconRestore from "@tabler/icons-svelte/IconRestore.svelte";
-    import IconPlayerPlay from "@tabler/icons-svelte/IconPlayerPlay.svelte";
-    import IconChevronLeft from "@tabler/icons-svelte/IconChevronLeft.svelte";
-    import IconChevronRight from "@tabler/icons-svelte/IconChevronRight.svelte";
 
     // Max timeline scale in seconds (default 10 minutes = 600s, can switch to 1h = 3600s)
     let maxTimelineSeconds = $state(600);
@@ -148,6 +144,7 @@
                 value={startSec}
                 oninput={handleStartSlider}
                 class="range-slider range-start"
+                style="z-index: {startSec > maxTimelineSeconds * 0.5 ? 4 : 2}"
                 aria-label="Trim Start Time"
             />
 
@@ -160,18 +157,25 @@
                 value={endSec}
                 oninput={handleEndSlider}
                 class="range-slider range-end"
+                style="z-index: {startSec > maxTimelineSeconds * 0.5 ? 2 : 4}"
                 aria-label="Trim End Time"
             />
         </div>
     </div>
 
-    <!-- Dual Time Controls with Step Adjusters -->
+    <!-- Dual Time Controls with Direct Input & Step Adjusters -->
     <div class="time-inputs-container">
         <!-- Start Time Box -->
         <div class="time-box">
             <div class="time-box-header">
                 <span class="box-label">START</span>
-                <span class="active-time">{$trimStart}</span>
+                <input
+                    type="text"
+                    class="time-edit-input"
+                    bind:value={$trimStart}
+                    placeholder="00:00:00"
+                    spellcheck="false"
+                />
             </div>
             <div class="step-buttons">
                 <button type="button" class="step-btn" onclick={() => adjustStart(-5)} title="-5s">-5s</button>
@@ -191,7 +195,13 @@
         <div class="time-box">
             <div class="time-box-header">
                 <span class="box-label">END</span>
-                <span class="active-time">{$trimEnd || formatSecondsToTime(maxTimelineSeconds)}</span>
+                <input
+                    type="text"
+                    class="time-edit-input"
+                    bind:value={$trimEnd}
+                    placeholder={formatSecondsToTime(maxTimelineSeconds)}
+                    spellcheck="false"
+                />
             </div>
             <div class="step-buttons">
                 <button type="button" class="step-btn" onclick={() => adjustEnd(-5)} title="-5s">-5s</button>
@@ -372,7 +382,6 @@
         background: linear-gradient(90deg, #8b5cf6 0%, #06b6d4 100%);
         border-radius: 9999px;
         pointer-events: none;
-        z-index: 1;
         box-shadow: 0 0 14px rgba(139, 92, 246, 0.6);
     }
 
@@ -397,7 +406,6 @@
         pointer-events: none;
         -webkit-appearance: none;
         appearance: none;
-        z-index: 2;
     }
 
     .range-slider::-webkit-slider-thumb {
@@ -453,7 +461,7 @@
     .time-box-header {
         display: flex;
         justify-content: space-between;
-        align-items: baseline;
+        align-items: center;
     }
 
     .box-label {
@@ -463,11 +471,30 @@
         color: #a78bfa;
     }
 
-    .active-time {
-        font-size: 14px;
+    .time-edit-input {
+        width: 80px;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        padding: 2px 4px;
+        font-size: 13.5px;
         font-weight: 700;
         font-family: inherit;
         color: #f8fafc;
+        text-align: right;
+        outline: none;
+        transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .time-edit-input:hover {
+        border-color: rgba(139, 92, 246, 0.3);
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    .time-edit-input:focus {
+        border-color: #8b5cf6;
+        background: rgba(139, 92, 246, 0.1);
+        box-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
     }
 
     .step-buttons {

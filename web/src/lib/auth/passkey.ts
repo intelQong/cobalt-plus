@@ -4,10 +4,25 @@ const STORAGE_KEY_ENABLED = "cobalt_passkey_enabled";
 const STORAGE_KEY_CREDENTIAL = "cobalt_passkey_credential";
 const SESSION_KEY_UNLOCKED = "cobalt_passkey_unlocked";
 
+function getValidRpId(): string | undefined {
+    if (!browser || typeof window === "undefined") return undefined;
+    const hostname = window.location.hostname;
+    // Check if hostname is an IPv4 address
+    if (/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(hostname)) {
+        return undefined;
+    }
+    // Check if hostname is an IPv6 address
+    if (hostname.includes(":")) {
+        return undefined;
+    }
+    return hostname || undefined;
+}
+
 export function isPasskeySupported(): boolean {
     if (!browser) return false;
     return Boolean(
         typeof window !== "undefined" &&
+        window.isSecureContext &&
         window.PublicKeyCredential &&
         typeof window.PublicKeyCredential === "function"
     );
@@ -44,7 +59,7 @@ function base64ToBuffer(base64: string): ArrayBuffer {
 
 export async function registerPasskey(userName: string = "Cobalt++ Owner"): Promise<boolean> {
     if (!isPasskeySupported()) {
-        throw new Error("WebAuthn / Passkeys are not supported in this browser.");
+        throw new Error("WebAuthn / Passkeys require a secure HTTPS context and a supported browser.");
     }
 
     const challenge = new Uint8Array(32);
@@ -53,11 +68,13 @@ export async function registerPasskey(userName: string = "Cobalt++ Owner"): Prom
     const userId = new Uint8Array(16);
     crypto.getRandomValues(userId);
 
+    const rpId = getValidRpId();
+
     const publicKeyOptions: PublicKeyCredentialCreationOptions = {
         challenge,
         rp: {
             name: "Cobalt++ Access Control",
-            id: window.location.hostname
+            ...(rpId ? { id: rpId } : {})
         },
         user: {
             id: userId,
@@ -104,18 +121,20 @@ export async function registerPasskey(userName: string = "Cobalt++ Owner"): Prom
 
 export async function authenticateWithPasskey(): Promise<boolean> {
     if (!isPasskeySupported()) {
-        throw new Error("WebAuthn / Passkeys are not supported in this browser.");
+        throw new Error("WebAuthn / Passkeys require a secure HTTPS context and a supported browser.");
     }
 
     const credJson = localStorage.getItem(STORAGE_KEY_CREDENTIAL);
     const challenge = new Uint8Array(32);
     crypto.getRandomValues(challenge);
 
+    const rpId = getValidRpId();
+
     const publicKeyOptions: PublicKeyCredentialRequestOptions = {
         challenge,
         timeout: 60000,
         userVerification: "preferred",
-        rpId: window.location.hostname
+        ...(rpId ? { rpId } : {})
     };
 
     if (credJson) {
@@ -130,7 +149,7 @@ export async function authenticateWithPasskey(): Promise<boolean> {
                 ];
             }
         } catch {
-            // allow fallback
+            // fallback if parse fails
         }
     }
 
